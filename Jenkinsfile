@@ -41,7 +41,7 @@ pipeline{
                    
                 }
             }
-
+        }
             stage('identifying misconfigs in helm charts using datree'){
                 steps{
                     script{
