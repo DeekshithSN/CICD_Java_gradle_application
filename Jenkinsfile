@@ -2,9 +2,8 @@ pipeline {
   agent any 
     stages{
         stage("sonarqube static code check"){
-
-            agent {
-                docker {
+            agent{
+                docker{
                     image: 'openjdk:11'
                 }
             }
