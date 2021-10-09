@@ -38,21 +38,21 @@ pipeline{
                                 docker rmi 34.125.214.226:8083/springapp:${VERSION}
                             '''
                     }
-                   
                 }
             }
         }
-            
-        stage('identifying misconfigs in helm charts using datree'){
-                steps{
-                    script{
-                        dir('kubernetes/') {
-                            sh 'helm datree test myapp/'
-                        }
+        stage('indentifying misconfigs using datree in helm charts'){
+            steps{
+                script{
+
+                    dir('kubernetes/') {
+                        sh 'helm datree test myapp/'
                     }
                 }
             }
         }
+
+    }
 
     post {
 		always {
