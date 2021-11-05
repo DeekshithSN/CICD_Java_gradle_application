@@ -39,4 +39,4 @@ jobs:
       run: curl https://get.datree.io | /bin/bash
         
     - name: Run Datree's policy check
-      run: datree test ~/.datree/k8s-demo.yaml
+      run: datree test kube.yaml
