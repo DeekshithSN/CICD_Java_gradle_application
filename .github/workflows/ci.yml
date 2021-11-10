@@ -3,6 +3,9 @@ name: Java CI with Gradle
 on:
   pull_request:
     branches: [ main ]
+    
+env:
+  DATREE_TOKEN: ${{ secrets.DATREE_TOKEN }} 
 
 jobs:
   build:
@@ -37,3 +40,5 @@ jobs:
         
     - name: Run Datree's policy check
       run: datree test kube.yaml
+
+
