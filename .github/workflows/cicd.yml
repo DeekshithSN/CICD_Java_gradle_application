@@ -6,7 +6,8 @@ on:
     
 env:
   DATREE_TOKEN: ${{ secrets.DATREE_TOKEN }} 
-
+  KUBECONFIG: /home/alerts_deekshith/kubeconfig/config_now 
+  
 jobs:
   build:
 
@@ -48,9 +49,15 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         
-    - name: docker build & docker 
+    - name: docker build & docker push
       run: |
         docker build -t 34.125.31.157:8083/javaapp:${{ github.run_number }} .
         docker push 34.125.31.157:8083/javaapp:${{ github.run_number }}
         docker rmi 34.125.31.157:8083/javaapp:${{ github.run_number }}
       
+    - name: deploying manifest file on k8s cluster 
+      run: | 
+        sed -i "s;imagename;34.125.31.157:8083/javaapp:${{ github.run_number }};g" kube.yaml
+        kubectl apply -f kube.yaml
+        sleep 30
+        kubectl get po 
