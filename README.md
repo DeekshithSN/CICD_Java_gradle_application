@@ -9,3 +9,6 @@ when we build the code using command ```./gradlew build ``` it will generate war
 code is integrated with sonarqube plugin which help us in static code analysis 
 
 ``` ./gradlew sonarqube ```
+
+
+want to use this in my project
