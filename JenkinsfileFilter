@@ -9,7 +9,7 @@ pipeline {
     stages {
           stage('Building') {
              steps {
-                  sh "mvn clean install  |  tee output.log"
+                  sh "./gradlew build   |  tee output.log"
                    }
                 }
                 stage('Monitoring the logs') {
