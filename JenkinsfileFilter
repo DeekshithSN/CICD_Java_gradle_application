@@ -1,0 +1,23 @@
+pipeline {
+    agent {
+          docker {
+                	image 'maven'
+                	args '-v $HOME/.m2:/root/.m2'
+               		}
+          	}
+  
+    stages {
+          stage('Building') {
+             steps {
+                  sh "mvn clean install  |  tee output.log"
+                   }
+                }
+                stage('Monitoring the logs') {
+                    steps {
+                        script {
+                                sh '! grep "WARNING" output.log'
+                        }
+                    }
+               }
+      }
+}
