@@ -14,7 +14,7 @@ pipeline {
           stage('Building') {
              steps {
                   sh 'chmod +x gradlew'
-                  sh "./gradlew build   |  tee output.log"
+                  sh "./gradlew build "
                    }
                 }
                 stage ('Check logs') {
