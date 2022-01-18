@@ -16,6 +16,7 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
+        cache: gradle
     - name: grant permission to the gradlew
       run: chmod +x gradlew
     - name: Build with gradle
