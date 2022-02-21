@@ -1,0 +1,24 @@
+pipeline{
+    agent any
+    stages{
+        stage("sonar qube analysis"){
+            agent{
+               docker {
+                    image 'openjdk:11'
+               }
+            }
+            steps{
+               script{
+                withSonarQubeEnv(credentialsId: 'sonar-token-test') {
+                      sh '''
+                      chmod +x gradlew
+                      ./gradlew sonarqube
+                      '''
+                    }
+
+               }
+            }
+        }
+    }
+    
+}
