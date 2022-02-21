@@ -1,13 +1,12 @@
 pipeline{
-    agent{
-            docker {
+    agent any
+    stages{
+        stage("sonar qube analysis"){
+            agent{
+               docker {
                     image 'openjdk:11'
                }
             }
-            
-    stages{
-        stage("sonar qube analysis"){
-          
             steps{
                script{
                 withSonarQubeEnv(credentialsId: 'sonar-token-test') {
@@ -15,6 +14,13 @@ pipeline{
                       chmod +x gradlew
                       ./gradlew sonarqube
                       '''
+                    }
+
+                timeout(5) {
+                     def qg = waitForQualityGate()
+                      if (qg.status != 'OK') {
+                           error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                      }
                     }
 
                }
