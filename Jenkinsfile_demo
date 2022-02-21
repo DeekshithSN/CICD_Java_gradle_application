@@ -1,12 +1,13 @@
 pipeline{
-    agent any
-    stages{
-        stage("sonar qube analysis"){
-            agent{
-               docker {
+    agent{
+            docker {
                     image 'openjdk:11'
                }
             }
+            
+    stages{
+        stage("sonar qube analysis"){
+          
             steps{
                script{
                 withSonarQubeEnv(credentialsId: 'sonar-token-test') {
