@@ -1,5 +1,8 @@
 pipeline{
     agent any
+    environment{
+        VERSION = "${env.BUILD_ID}"
+    }
     stages{
         stage("sonar qube analysis"){
             agent{
@@ -22,10 +25,29 @@ pipeline{
                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
                       }
                     }
-
                }
             }
         }
+
+       stage("building docker image and pushing it to nexus"){
+           steps{
+               script{
+
+                withCredentials([string(credentialsId: 'nexs-password', variable: 'docker-passwd')]) {
+                    sh '''
+
+                   docker build -t 34.125.203.155:8083/springapp:${VERSION} .
+                   docker login -u admin -p $docker-passwd 34.125.203.155:8083
+                  docker push  34.125.203.155:8083/springapp:${VERSION}
+                  docker rmi 34.125.203.155:8083/springapp:${VERSION}        
+                  '''
+                    }
+                }
+              }
+           }
+
+
+
     }
     
 }
