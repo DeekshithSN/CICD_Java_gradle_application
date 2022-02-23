@@ -81,7 +81,7 @@ pipeline{
                      withCredentials([kubeconfigFile(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG')]) {
                          sh '''
                          echo "executing health check it might take a while"
-                         sleep 60
+                         sleep 120
                          kubectl run curl --image=curlimages/curl -i --rm --restart=Never -- curl myjavaapp-myapp:8080
                          '''
 
