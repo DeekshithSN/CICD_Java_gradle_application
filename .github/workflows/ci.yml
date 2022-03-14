@@ -20,3 +20,8 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+      
+    - name: Install Datree
+      run: curl https://get.datree.io | /bin/bash
+    - name: Run Datree's policy check
+      run: datree test kube.yaml
