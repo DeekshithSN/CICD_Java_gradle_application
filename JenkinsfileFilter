@@ -1,0 +1,23 @@
+pipeline {
+    agent {
+          docker {
+                	image 'openjdk:11'
+               		}
+          	}
+  
+    stages {
+          stage('Building') {
+             steps {
+                  sh 'chmod +x gradlew'
+                  sh "./gradlew build   |  tee output.log"
+                   }
+                }
+                stage('Monitoring the logs') {
+                    steps {
+                        script {
+                                sh '! grep "Task" output.log'
+                        }
+                    }
+               }
+      }
+}
