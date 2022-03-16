@@ -79,4 +79,4 @@ spec:
               cpu: 0.5
             limits:
               memory: 0.25Gi 
-              cpu: 0.5
+              cpu: 0.9
