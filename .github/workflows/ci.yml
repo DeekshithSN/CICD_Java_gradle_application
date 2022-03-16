@@ -16,8 +16,12 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
-        cache: gradle
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+      
+    - name: Install Datree
+      run: curl https://get.datree.io | /bin/bash
+    - name: Run Datree's policy check
+      run: datree test kube.yaml
