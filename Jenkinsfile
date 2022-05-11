@@ -61,6 +61,7 @@ pipeline{
                               dir('kubernetes/') {
                              sh '''
                                  helmversion=$( helm show chart myapp | grep version | cut -d: -f 2 | tr -d ' ')
+                                 apt upgrade curl -y
                                  tar -czvf  myapp-${helmversion}.tgz myapp/
                                  curl -u admin:$docker-pass http://54.204.131.79:8081/repository/helm-hosted/ --upload-file myapp-${helmversion}.tgz -v
                             '''
