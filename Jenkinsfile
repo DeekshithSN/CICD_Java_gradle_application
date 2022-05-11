@@ -57,12 +57,12 @@ pipeline{
         stage("pushing the helm charts to nexus"){
             steps{
                 script{
-                    withCredentials([string(credentialsId: 'docker-pass', variable: 'docker_password')]) {
+                    withCredentials([usernamePassword(credentialsId: 'nexus', passwordVariable: 'nexus_password', usernameVariable: 'nexus_username')]) {
                               dir('kubernetes/') {
                              sh '''
                                  helmversion=$( helm show chart myapp | grep version | cut -d: -f 2 | tr -d ' ')
                                  tar -czvf  myapp-${helmversion}.tgz myapp/
-                                 curl -u admin:$docker-pass http://54.204.131.79:8081/repository/helm-hosted/ --upload-file myapp-${helmversion}.tgz -v
+                                 curl -u $nexus_username:$nexus_password http://54.204.131.79:8081/repository/helm-hosted/ --upload-file myapp-${helmversion}.tgz -v
                             '''
                           }
                     }
