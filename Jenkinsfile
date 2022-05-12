@@ -32,10 +32,10 @@ pipeline{
                 script{
                     withCredentials([string(credentialsId: 'docker-pass', variable: 'docker_password')]) {
                              sh '''
-                                docker build -t 54.204.131.79:8083/test-app:${VERSION} .
-                                docker login -u admin -p $docker_password 54.204.131.79:8083 
-                                docker push  54.204.131.79:8083/test-app:${VERSION}
-                                docker rmi 54.204.131.79:8083/test-app:${VERSION}
+                                docker build -t 54.224.40.217:8083/test-app:${VERSION} .
+                                docker login -u admin -p $docker_password 54.224.40.217:8083 
+                                docker push  54.224.40.217:8083/test-app:${VERSION}
+                                docker rmi 54.224.40.217:8083/test-app:${VERSION}
                             '''
                     }
                 }
@@ -62,7 +62,7 @@ pipeline{
                              sh '''
                                  helmversion=$( helm show chart myapp | grep version | cut -d: -f 2 | tr -d ' ')
                                  tar -czvf  myapp-${helmversion}.tgz myapp/
-                                 curl -u $nexus_username:$nexus_password http://54.204.131.79:8081/repository/helm-hosted/ --upload-file myapp-${helmversion}.tgz -v
+                                 curl -u $nexus_username:$nexus_password http://54.224.40.217:8081/repository/helm-hosted/ --upload-file myapp-${helmversion}.tgz -v
                             '''
                           }
                     }
@@ -81,17 +81,17 @@ pipeline{
         //     }
         // }
 
-        // stage('Deploying application on k8s cluster') {
-        //     steps {
-        //        script{
-        //            withCredentials([kubeconfigFile(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG')]) {
-        //                 dir('kubernetes/') {
-        //                   sh 'helm upgrade --install --set image.repository="54.204.131.79:8083/test-app" --set image.tag="${VERSION}" myjavaapp myapp/ ' 
-        //                 }
-        //             }
-        //        }
-        //     }
-        // }
+        stage('Deploying application on k8s cluster') {
+            steps {
+               script{
+                   withCredentials([kubeconfigFile(credentialsId: 'k8s-cluster', variable: 'KUBECONFIG')]) {
+                        dir('kubernetes/') {
+                          sh 'helm upgrade --install --set image.repository="54.224.40.217:8083/test-app" --set image.tag="${VERSION}" myjavaapp myapp/ ' 
+                        }
+                    }
+               }
+            }
+        }
 
         // stage('verifying app deployment'){
         //     steps{
