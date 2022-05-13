@@ -92,6 +92,7 @@ pipeline{
                }
             }
         }
+        
 
         // stage('verifying app deployment'){
         //     steps{
