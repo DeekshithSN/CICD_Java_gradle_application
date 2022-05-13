@@ -84,11 +84,10 @@ pipeline{
         stage('Deploying application on k8s cluster') {
             steps {
                script{
-                   withCredentials([kubeconfigFile(credentialsId: 'k8s-cluster', variable: 'KUBECONFIG')]) {
                         dir('kubernetes/') {
                           sh 'helm upgrade --install --set image.repository="54.224.40.217:8083/test-app" --set image.tag="${VERSION}" myjavaapp myapp/ ' 
                         }
-                    }
+                    
                }
             }
         }
