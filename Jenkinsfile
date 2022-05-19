@@ -15,6 +15,13 @@ pipeline{
                      withSonarQubeEnv(credentialsId: 'sonarqube') {
                              sh 'chmod +x gradlew'
                              sh './gradlew -version'
+                             sh '''
+                                   add-apt-repository ppa:cwchien/gradle
+                                   apt-get update
+                                   apt upgrade gradle
+                                   
+                                '''
+                             sh './gradlew -version'
                              sh './gradlew -Dsonar.host.url=http://54.91.142.27:9000 sonarqube --warning-mode all'
                      }
                     timeout(time: 1, unit: 'HOURS') {
