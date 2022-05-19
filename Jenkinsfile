@@ -13,8 +13,8 @@ pipeline{
              steps{
                  script{
                      withSonarQubeEnv(credentialsId: 'sonarqube') {
-                             sh 'chmod +x gradlew --status'
-                             sh './gradlew sonarqube'
+                             sh 'chmod +x gradlew'
+                             sh './gradlew sonarqube --status'
                      }
                     timeout(time: 1, unit: 'HOURS') {
                        def qg = waitForQualityGate()
