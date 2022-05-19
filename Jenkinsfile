@@ -14,6 +14,7 @@ pipeline{
                  script{
                      withSonarQubeEnv(credentialsId: 'sonarqube') {
                              sh 'chmod +x gradlew'
+                             sh './gradlew -version'
                              sh './gradlew -Dsonar.host.url=http://54.91.142.27:9000 sonarqube --warning-mode all'
                      }
                     timeout(time: 1, unit: 'HOURS') {
