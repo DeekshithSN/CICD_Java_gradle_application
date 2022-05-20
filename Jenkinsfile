@@ -7,13 +7,15 @@ pipeline{
         stage("sonar quality check"){
             agent {
                 docker {
-                    image 'adoptopenjdk/openjdk11'
+                    image 'gradle-docker'
                 }
             }
             steps{
                 script{
                     withSonarQubeEnv(credentialsId: 'sonarqube') {
+                            sh 'cd /opt/gradle/gradle-7.5-rc-1/'
                             sh 'chmod +x gradlew'
+                            sh './gradlew -version'
                             sh './gradlew -Dsonar.host.url=http://54.91.142.27:9000 sonarqube --warning-mode all'
                     }
                    timeout(time: 1, unit: 'HOURS') {
