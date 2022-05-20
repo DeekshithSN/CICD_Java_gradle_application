@@ -12,7 +12,7 @@ pipeline{
             }
             steps{
                script{
-                withSonarQubeEnv(credentialsId: 'sonar-token-test') {
+                withSonarQubeEnv(credentialsId: 'sonar-token') {
                       sh '''
                       chmod +x gradlew
                       ./gradlew sonarqube
@@ -36,10 +36,10 @@ pipeline{
                withCredentials([string(credentialsId: 'nexus_pass', variable: 'docker_pass')]) {
                     sh '''
 
-                   docker build -t 34.125.203.155:8083/springapp:${VERSION} .
-                   docker login -u admin -p $docker_pass 34.125.203.155:8083
-                  docker push  34.125.203.155:8083/springapp:${VERSION}
-                  docker rmi 34.125.203.155:8083/springapp:${VERSION}  
+                   docker build -t 35.188.44.251:8083/springapp:${VERSION} .
+                   docker login -u admin -p $docker_pass 35.188.44.251:8083
+                  docker push  35.188.44.251:8083/springapp:${VERSION}
+                  docker rmi 35.188.44.251:8083/springapp:${VERSION}  
                   docker image prune -f      
                   '''
                   }
