@@ -4,27 +4,27 @@ pipeline{
         VERSION = "${env.BUILD_ID}"
     }
     stages{
-        // stage("sonar quality check"){
-        //     agent {
-        //         docker {
-        //             image 'openjdk:11'
-        //         }
-        //     }
-        //     steps{
-        //         script{
-        //             withSonarQubeEnv(credentialsId: 'sonarqube') {
-        //                     sh 'chmod +x gradlew'
-        //                     sh './gradlew -Dsonar.host.url=http://54.91.142.27:9000 sonarqube --warning-mode all'
-        //             }
-        //            timeout(time: 1, unit: 'HOURS') {
-        //               def qg = waitForQualityGate()
-        //               if (qg.status != 'OK') {
-        //                    error "Pipeline aborted due to quality gate failure: ${qg.status}"
-        //               }
-        //             }
-        //        }  
-        //     }
-        // }
+        stage("sonar quality check"){
+            agent {
+                docker {
+                    image 'gradle'
+                }
+            }
+            steps{
+                script{
+                    withSonarQubeEnv(credentialsId: 'sonarqube') {
+                            sh 'chmod +x gradlew'
+                            sh './gradlew -Dsonar.host.url=http://54.91.142.27:9000 sonarqube --warning-mode all'
+                    }
+                   timeout(time: 1, unit: 'HOURS') {
+                      def qg = waitForQualityGate()
+                      if (qg.status != 'OK') {
+                           error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                      }
+                    }
+               }  
+            }
+        }
         stage("docker build & docker push"){
             steps{
                 script{
