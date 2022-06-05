@@ -27,7 +27,8 @@ test {
 
 
 sonarqube {
-  properties {
-    property "sonar.projectKey", "gradle-project"
-  }
+    properties {
+        property 'sonar.host.url', 'http://devk8slb.ssnc-corp.cloud:9000'
+        property 'sonar.login', '9af4a3a7c60a2cbcdc189660abdc3508bca2f7bf'
+    }
 }
