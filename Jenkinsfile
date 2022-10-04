@@ -25,5 +25,20 @@ pipeline{
                 }  
             }
         }
+        stage("docker build & docker push"){
+            steps{
+                script{
+                    withCredentials([string(credentialsId: 'docker_pass', variable: 'docker_password')]) {
+    
+                        sh '''
+                        docker build -t 192.168.1.202:8083/sprintapp:${VERSION} .
+                        docker login -u admin -p $docker_password 192.168.1.202:8083
+                        docker push 192.168.1.202:8083/sprintapp:${VERSION}
+                        docker rmi 192.168.1.202:8083/sprintapp:${VERSION}
+                        '''
+                    }
+                }
+            }
+        }
     }
 }
