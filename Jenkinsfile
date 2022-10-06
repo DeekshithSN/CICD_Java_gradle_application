@@ -65,6 +65,19 @@ pipeline{
                 }
             }
         }
+        stage(""){
+            steps{
+                script{
+                    withCredentials([kubeconfigFile(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG')]) {
+                        // some block
+                        dir ("kubernetes/"){  
+				            sh 'helm list'
+				            sh 'helm upgrade --install --set image.repository="192.168.1.202:8083/springapp" --set image.tag="${VERSION}" myjavaapp myapp/ ' 
+			            }
+                    }
+                }
+            }
+        }
     }
     post {
 		always {
