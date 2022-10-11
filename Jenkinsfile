@@ -16,7 +16,7 @@ pipeline{
                         sh 'chmod +x gradlew'
                         sh './gradlew sonarqube'
                     }
-                    timeout(9) {
+                    timeout(5) {
                         def qg = waitForQualityGate()
                         if(qg.status != 'OK'){
                             error "Pipeline aborted due to quality gate failure: ${qg.status}"
@@ -41,21 +41,23 @@ pipeline{
                 }
             }
         }
-
-        stage("identifying misconfigs using datree in helm charts") {
+        stage('indentifying misconfigs using datree in helm charts'){
             steps{
-                script {
+                script{
+
                     dir('kubernetes/') {
+                      
                         sh 'helm datree test myapp/'
+                    
                     }
                 }
             }
         }
-    }
-     post {
+     
+	}
+    post {
 		always {
 			mail bcc: '', body: "<br>Project: ${env.JOB_NAME} <br>Build Number: ${env.BUILD_NUMBER} <br> URL de build: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", to: "tamagni2021@gmail.com";  
 		}
-	}
 }
   
