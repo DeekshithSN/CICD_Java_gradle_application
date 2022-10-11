@@ -16,7 +16,7 @@ pipeline{
                         sh 'chmod +x gradlew'
                         sh './gradlew sonarqube'
                     }
-                    timeout(7) {
+                    timeout(9) {
                         def qg = waitForQualityGate()
                         if(qg.status != 'OK'){
                             error "Pipeline aborted due to quality gate failure: ${qg.status}"
