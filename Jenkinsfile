@@ -72,7 +72,7 @@ pipeline{
             steps{
                 script{
                     timeout(10) {
-                        input(id: "Deploy Gate", message: "Deploy ${params.project_name}?", ok: 'Deploy')
+                        input(id: "Deploy Gate", message: "Deploy ${params.project_name}?", ok: 'Deploy');
                     }
                 }
             }
