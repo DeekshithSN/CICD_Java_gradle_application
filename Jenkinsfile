@@ -90,8 +90,8 @@ pipeline{
                }
             }
         }
-        
-         stage('verifying app deployment'){
+
+        stage('verifying app deployment'){
             steps{
                 script{
                      withCredentials([kubeconfigFile(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG')]) {
