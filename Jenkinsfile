@@ -10,7 +10,7 @@ pipeline {
                     }
                     timeout(30) {
                         def qualityGate = waitForQualityGate()
-                        if (qualityGate != 'OK') {
+                        if (qualityGate.status != 'OK') {
                             error "Pipeline aborted due to quality gate failure: ${qualityGate.status}"
                         }
                     }
