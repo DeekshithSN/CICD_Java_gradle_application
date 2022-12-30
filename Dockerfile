@@ -2,7 +2,7 @@ FROM openjdk:11 as base
 WORKDIR /app
 COPY . .
 RUN ./gradlew build
-RUN docker rmi -f openjdk:11
+
 
 FROM tomcat:9
 WORKDIR webapps
