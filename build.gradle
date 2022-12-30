@@ -25,6 +25,11 @@ test {
 	useJUnitPlatform()
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
 
 sonarqube {
     properties {
