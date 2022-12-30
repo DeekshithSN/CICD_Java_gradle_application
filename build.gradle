@@ -25,15 +25,11 @@ test {
 	useJUnitPlatform()
 }
 
-jacocoTestReport {
-    reports {
-        xml.enabled true
-    }
-}
+
 
 sonarqube {
     properties {
-        property 'sonar.host.url', 'http://34.125.201.58:9000'
+        property 'sonar.host.url', 'http://54.237.86.179:9000/'
         property 'sonar.login', '******'
     }
 }
