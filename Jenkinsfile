@@ -33,18 +33,12 @@ pipeline {
         stage("DOcker build and push") {
             steps{
                 script{
-                    withCredentials([usernameColonPassword(credentialsId: 'admin', variable: 'nexus_user')]) {
-                            sh '''
+                    sh '''
                             docker build -t 23.20.71.185:8083/springapp:${VERSION} .
                             docker login -u jenkins-user -p nexus_pass 23.20.71.185:8083
                             docker push 23.20.71.185:8083/springapp:${VERSION}
                             docker rmi 23.20.71.185:8083/springapp:${VERSION}
                         '''
-                    }
-
-                    // withCredentials([string(credentialsId: 'nexus_pass', variable: 'nexus_pass')]) {
-                         
-                    // }
                    
                 }
             }
