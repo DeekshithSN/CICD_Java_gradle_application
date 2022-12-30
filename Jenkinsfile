@@ -9,7 +9,7 @@ pipeline {
                 script {
                     withSonarQubeEnv(credentialsId: 'sonar') {
                         sh 'chmod +x gradlew'
-                        sh './gradlew sonarqube' /* it will push code to sonar qube for static quality check */
+                        sh './gradlew sonarqube --stacktrace' /* it will push code to sonar qube for static quality check */
                     }
                 }
             }
