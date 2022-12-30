@@ -2,6 +2,7 @@ pipeline {
     agent any
     environment{
         VERSION="${env.BUILD_ID}"
+        DOCKER_USER= "admin"
     }
     stages {
        stage('Sonary quality check') {
