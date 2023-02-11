@@ -1,10 +1,10 @@
 pipeline{
     agent any 
-  /*  environment{
+    environment{
         VERSION = "${env.BUILD_ID}"
-    } */
+    } 
     stages{
-        stage("sonar quality check"){
+        /*stage("sonar quality check"){
             agent {
                 docker {
                     image 'openjdk:11'
@@ -17,17 +17,17 @@ pipeline{
                             sh './gradlew sonarqube'
                     }
 
-                   /* timeout(time: 1, unit: 'HOURS') {
+                    timeout(time: 1, unit: 'HOURS') {
                       def qg = waitForQualityGate()
                       if (qg.status != 'OK') {
                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
                       }
-                    } */
+                    } 
 
                 }  
             }
-        }
-       /* stage("docker build & docker push"){
+        } */
+        stage("docker build & docker push"){
             steps{
                 script{
                     withCredentials([string(credentialsId: 'docker_pass', variable: 'docker_password')]) {
@@ -41,7 +41,7 @@ pipeline{
                 }
             }
         }
-        stage('indentifying misconfigs using datree in helm charts'){
+        /*stage('indentifying misconfigs using datree in helm charts'){
             steps{
                 script{
 
