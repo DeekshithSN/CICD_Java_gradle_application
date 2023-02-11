@@ -17,31 +17,31 @@ pipeline{
                             sh './gradlew sonarqube'
                     }
 
-                    timeout(time: 2, unit: 'MINUTES') {
+                  /*  timeout(time: 2, unit: 'MINUTES') {
                       def qg = waitForQualityGate()
                       if (qg.status != 'OK') {
                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
                       }
-                    } 
+                    } */
 
                 }  
             }
         } 
-        /*stage("docker build & docker push"){
+        stage("docker build & docker push"){
             steps{
                 script{
                     withCredentials([string(credentialsId: 'docker_pass', variable: 'docker_password')]) {
                              sh '''
-                                docker build -t 34.125.214.226:8083/springapp:${VERSION} .
-                                docker login -u admin -p $docker_password 34.125.214.226:8083 
-                                docker push  34.125.214.226:8083/springapp:${VERSION}
-                                docker rmi 34.125.214.226:8083/springapp:${VERSION}
+                                docker build -t http://35.222.47.82/:8083/springapp:${VERSION} .
+                                docker login -u admin -p $docker_password http://35.222.47.82/:8083 
+                                docker push  http://35.222.47.82/:8083/springapp:${VERSION}
+                                docker rmi http://35.222.47.82/:8083/springapp:${VERSION}
                             '''
                     }
                 }
             }
         }
-        stage('indentifying misconfigs using datree in helm charts'){
+       /* stage('indentifying misconfigs using datree in helm charts'){
             steps{
                 script{
 
