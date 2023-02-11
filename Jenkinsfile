@@ -4,7 +4,7 @@ pipeline{
         VERSION = "${env.BUILD_ID}"
     } 
     stages{
-        /*stage("sonar quality check"){
+        stage("sonar quality check"){
             agent {
                 docker {
                     image 'openjdk:11'
@@ -26,8 +26,8 @@ pipeline{
 
                 }  
             }
-        } */
-        stage("docker build & docker push"){
+        } 
+        /*stage("docker build & docker push"){
             steps{
                 script{
                     withCredentials([string(credentialsId: 'docker_pass', variable: 'docker_password')]) {
@@ -41,7 +41,7 @@ pipeline{
                 }
             }
         }
-        /*stage('indentifying misconfigs using datree in helm charts'){
+        stage('indentifying misconfigs using datree in helm charts'){
             steps{
                 script{
 
