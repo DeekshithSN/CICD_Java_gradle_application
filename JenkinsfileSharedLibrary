@@ -19,7 +19,7 @@ pipeline {
                 }
                 stage ('Check logs') {
                     steps {
-                        filterLogs ('Task', 15)
+                        filterLogs ('Task', 3)
                     }
                 }
       }
