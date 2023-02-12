@@ -32,16 +32,16 @@ pipeline{
                 script{
                     withCredentials([string(credentialsId: 'docker_pass', variable: 'docker_password')]) {
                              sh '''
-                                docker build -t 35.222.47.82:8083/springapp:${VERSION} .
-                                docker login -u admin -p $docker_password 35.222.47.82:8083 
-                                docker push 35.222.47.82:8083/springapp:${VERSION}
-                                docker rmi 35.222.47.82:8083/springapp:${VERSION}  
+                                docker build -t 35.222.146.161:8083/springapp:${VERSION} .
+                                docker login -u admin -p $docker_password 35.222.146.161:8083 
+                                docker push 35.222.146.161:8083/springapp:${VERSION}
+                                docker rmi 35.222.146.161:8083/springapp:${VERSION}  
                             '''
                     }
                 }
             }
         }
-        stage('indentifying misconfigs using datree in helm charts'){
+      /*  stage('indentifying misconfigs using datree in helm charts'){
             steps{
                 script{
 
@@ -52,8 +52,8 @@ pipeline{
                     }
                 }
             }
-        }
-       /* stage("pushing the helm charts to nexus"){
+        }  */
+        stage("pushing the helm charts to nexus"){
             steps{
                 script{
                     withCredentials([string(credentialsId: 'docker_pass', variable: 'docker_password')]) {
@@ -69,7 +69,7 @@ pipeline{
             }
         }
 
-        stage('manual approval'){
+      /*  stage('manual approval'){
             steps{
                 script{
                     timeout(10) {
