@@ -5,11 +5,11 @@ pipeline{
     } 
     stages{
         stage("sonar quality check"){
-         /*   agent {
+            agent {
                 docker {
                     image 'openjdk:11'
                 }
-            } */
+            } 
            steps{
                 script{
                     withSonarQubeEnv(credentialsId: 'sonar-token') {
@@ -81,7 +81,7 @@ pipeline{
             }
         }*/
 
-        stage('Deploying application on k8s cluster') {
+       /* stage('Deploying application on k8s cluster') {
             steps {
                script{
                    withCredentials([kubeconfigFile(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG')]) {
@@ -91,7 +91,7 @@ pipeline{
                     }
                }
             }
-        }
+        }*/
 
        /* stage('verifying app deployment'){
             steps{
