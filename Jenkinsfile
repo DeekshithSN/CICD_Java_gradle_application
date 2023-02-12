@@ -30,6 +30,7 @@ pipeline{
         stage("docker build & docker push"){
             steps{
                 script{
+                   // withCredentials([string(credentialsId: 'docker_pass', variable: 'docker_password')])
                     withCredentials([string(credentialsId: 'docker_pass', variable: 'docker_password')]) {
                              sh '''
                                 docker build -t 35.222.146.161:8083/springapp:${VERSION} .
