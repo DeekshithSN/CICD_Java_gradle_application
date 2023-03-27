@@ -1,4 +1,4 @@
-# this is multi stage 
+# this is multi stages 
 FROM openjdk:11 as base 
 WORKDIR /app
 COPY . . 
