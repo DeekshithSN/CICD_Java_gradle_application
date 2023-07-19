@@ -19,8 +19,10 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          command: ["/bin/sh"]
-          args: ["-c","sh /usr/local/tomcat/bin/startup.sh;while true; do echo hello; sleep 10;done"]
+          command:
+            - "sh"
+            - "-c"
+            - "sh /usr/local/tomcat/bin/startup.sh; while true; do echo hello; sleep 10; done"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -51,4 +53,6 @@ spec:
             limits:
               memory: 0.25Gi 
               cpu: 0.5
-
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
