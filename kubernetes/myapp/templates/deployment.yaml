@@ -51,4 +51,8 @@ spec:
             limits:
               memory: 0.25Gi 
               cpu: 0.5
+          # Add the securityContext section here
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
 
