@@ -60,3 +60,10 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Generate container command for the Deployment.
+*/}}
+{{- define "myapp.containerCommand" -}}
+[ "/bin/sh", "-c" ]
+{{- end }}
