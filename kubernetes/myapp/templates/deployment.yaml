@@ -19,8 +19,8 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          command: ["/bin/sh"]
-          args: ["-c","sh /usr/local/tomcat/bin/startup.sh;while true; do echo hello; sleep 10;done"]
+          command: ["/usr/local/tomcat/bin/catalina.sh", "run"]
+          args: []
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -46,13 +46,14 @@ spec:
             timeoutSeconds: 10
           resources:
             requests:
-              memory: 0.25Gi
+              memory: 1Gi
               cpu: 0.5
             limits:
-              memory: 0.25Gi 
+              memory: 1Gi
               cpu: 0.5
           # Add the securityContext section here
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
+
 
