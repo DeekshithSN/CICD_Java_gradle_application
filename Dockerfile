@@ -1,18 +1,17 @@
-# First stage: Build the Java application
-FROM openjdk:11 as base
+# Stage 1: Build the application
+FROM openjdk:11 as base 
 WORKDIR /app
-COPY . .
+COPY . . 
 RUN chmod +x gradlew
-RUN ./gradlew build
+RUN ./gradlew build 
 
-# Second stage: Create the Tomcat container and deploy the built application
+# Stage 2: Create a custom Tomcat image
 FROM tomcat:9
-RUN rm -rf /usr/local/tomcat/webapps/ROOT
+WORKDIR /usr/local/tomcat
+RUN mkdir logs
+RUN chown -R 1000:1000 logs
 
-COPY --from=base /app/build/libs/sampleWeb-0.0.1-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
+WORKDIR webapps
+COPY --from=base /app/build/libs/sampleWeb-0.0.1-SNAPSHOT.war .
+RUN rm -rf ROOT && mv sampleWeb-0.0.1-SNAPSHOT.war ROOT.war
 
-# Expose port 8080 (default Tomcat port)
-EXPOSE 8080
-
-# Start Tomcat
-CMD ["catalina.sh", "run"]
