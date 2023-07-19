@@ -19,7 +19,10 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          {{- include "myapp.containerCommand" | nindent 10 }} ["sh", "/usr/local/tomcat/bin/startup.sh;while true; do echo hello; sleep 10;done"]
+          command:
+            - "sh"
+            - "-c"
+            - "sh /usr/local/tomcat/bin/startup.sh; while true; do echo hello; sleep 10; done"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
