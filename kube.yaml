@@ -46,7 +46,7 @@ spec:
         - name: registry-secret
       containers:
         - name: myapp
-          image: imagename
+          image: nginx:1.0
           command: ["/bin/sh"]
           args: ["-c","sh /usr/local/tomcat/bin/startup.sh;while true; do echo hello; sleep 10;done"]
           imagePullPolicy: IfNotPresent
