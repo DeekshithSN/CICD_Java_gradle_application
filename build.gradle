@@ -30,5 +30,6 @@ sonarqube {
     properties {
         property 'sonar.host.url', 'http://54.167.57.57:9000'
         property 'sonar.login', 'squ_52374959163c3190dc8f574a18110f7336d471f8'
+		property 'org.gradle.daemon', 'false'
     }
 }
