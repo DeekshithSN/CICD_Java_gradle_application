@@ -20,6 +20,16 @@ pipeline{
     }
     
     stages{
+
+        stage("lint"){
+            steps{
+                script{
+                    docker.image('438465167406.dkr.ecr.us-east-1.amazonaws.com/spring-app:lint').inside('--user root') {
+                        sh './lint-all.sh'
+                    }
+                }
+            }
+        }
         stage('Build and Sonar Parallel') {
             parallel {
                 stage("build"){
