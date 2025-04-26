@@ -1,6 +1,11 @@
 def getDockerTag(){
-        def tag = sh script: 'git rev-parse --short HEAD', returnStdout: true
+        def tag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         return tag
+}
+
+def getAwsAccountID(){
+        def accountid = sh(script: 'aws sts get-caller-identity --query Account --output text', returnStdout: true).trim()
+        return accountid
 }
 
 pipeline{
@@ -10,6 +15,8 @@ pipeline{
 
     environment{
 	    Docker_tag = getDockerTag()
+        aws_account_id = getAwsAccountID()
+        aws_region = "us-east-1"
     }
     
     stages{
@@ -57,8 +64,8 @@ pipeline{
     stage("docker build"){
             steps{
                 script{
-                    sh 'docker build -t sample-app:${Docker_tag} . '
-                    currentBuild.description = "sample-app:${Docker_tag}"
+                    sh 'docker build -t spring-app:${Docker_tag} . '
+                    currentBuild.description = "spring-app:${Docker_tag}"
                 }
             }
         }
@@ -66,11 +73,22 @@ pipeline{
     stage("docker push"){
             steps{
                 script{
-                    sh 'docker images'
-                    sh 'docker rmi $(docker images -qa)'
+                    sh '''
+                        aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin ${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com
+                        docker tag spring-app:${Docker_tag} ${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com/spring-app:${Docker_tag}
+                        docker push ${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com/spring-app:${Docker_tag}
+                        docker rmi ${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com/spring-app:${Docker_tag} spring-app:${Docker_tag}
+                    '''
                 }
             }
         }
 
     }
+    post {
+		always {
+            archiveArtifacts artifacts: 'build/reports/tests/test/**', followSymlinks: false
+            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'build/reports/tests/test/', reportFiles: 'index.html', reportName: 'test-case-report', reportTitles: 'test-case-report', useWrapperFileDirectly: true])
+            cleanWs()
+		 }
+	   }
 }
