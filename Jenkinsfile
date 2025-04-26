@@ -83,6 +83,19 @@ pipeline{
             }
         }
 
+        stage("prepare helm charts"){
+            steps{
+                script{
+                    sh '''
+                        sed -i "s:IMAGE_NAME:${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com/spring-app:" kubernetes/myapp/values.yaml
+                        sed -i "s:IMAGE_TAG:${Docker_tag}:" kubernetes/myapp/values.yaml
+                        helm package kubernetes/myapp/
+                        aws s3 cp spring-app* s3://nimbus-python-practice/helm-charts
+                    '''
+                }
+            }
+        }
+
     }
     post {
 		always {
