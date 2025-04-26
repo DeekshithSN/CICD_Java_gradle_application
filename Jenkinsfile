@@ -90,7 +90,7 @@ pipeline{
                         sed -i "s:IMAGE_NAME:${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com/spring-app:" kubernetes/myapp/values.yaml
                         sed -i "s:IMAGE_TAG:${Docker_tag}:" kubernetes/myapp/values.yaml
                         helm package kubernetes/myapp/
-                        helmversion=$( helm show chart myapp | grep version | cut -d: -f 2 | tr -d ' ')
+                        helmversion=$( helm show chart kubernetes/myapp/ | grep version | cut -d: -f 2 | tr -d ' ')
                         aws s3 cp spring-app-$helmversion.tgz s3://nimbus-python-practice/helm-charts/spring-app-$helmversion.tgz
                     '''
                 }
