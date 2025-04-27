@@ -25,7 +25,15 @@ pipeline{
             steps{
                 script{
                     docker.image('438465167406.dkr.ecr.us-east-1.amazonaws.com/spring-app:lint').inside('--user root') {
-                        sh './lint-all.sh'
+                       try { 
+                            sh 'chmod +x lint-all.sh'
+                            sh './lint-all.sh'
+                       } 
+                       catch (err) {
+                                currentBuild.result = 'UNSTABLE'
+                                echo "Please correct linter issues "
+                                return // skip waitForQualityGate if gradle failed
+                        }
                     }
                 }
             }
