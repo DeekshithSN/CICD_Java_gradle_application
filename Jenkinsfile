@@ -20,24 +20,37 @@ pipeline{
     }
     
     stages{
-
-        stage("lint"){
-            steps{
-                script{
-                    docker.image('438465167406.dkr.ecr.us-east-1.amazonaws.com/spring-app:lint').inside('--user root') {
-                       try { 
-                            sh 'chmod +x lint-all.sh'
-                            sh './lint-all.sh'
-                       } 
-                       catch (err) {
-                                currentBuild.result = 'UNSTABLE'
-                                echo "Please correct linter issues "
-                                return // skip waitForQualityGate if gradle failed
+        stage('intial checks') {
+            parallel {
+            stage("lint"){
+                steps{
+                    script{
+                        docker.image('438465167406.dkr.ecr.us-east-1.amazonaws.com/spring-app:lint').inside('--user root') {
+                        try { 
+                                sh 'chmod +x lint-all.sh'
+                                sh './lint-all.sh'
+                        } 
+                        catch (err) {
+                                    currentBuild.result = 'UNSTABLE'
+                                    echo "Please correct linter issues "
+                                    return // skip waitForQualityGate if gradle failed
+                            }
                         }
                     }
                 }
             }
+
+            stage("helath-check"){
+                steps{
+                    script{
+                                sh 'chmod +x health-check.sh'
+                                sh './health-check.sh'
+                    }
+                }
+            }
         }
+        }
+
         stage('Build and Sonar Parallel') {
             parallel {
                 stage("build"){
