@@ -1,0 +1,31 @@
+FROM ubuntu:22.04
+
+# Install basic tools
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    unzip \
+    git \
+    openjdk-11-jdk \
+    shellcheck \
+    jq \
+    docker.io \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install hadolint for Dockerfile linting
+RUN wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64 && chmod +x /bin/hadolint
+
+# Install Checkstyle for Java
+RUN wget -O /opt/checkstyle.jar https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.3/checkstyle-10.12.3-all.jar
+
+# Install SpotBugs for Java
+RUN wget https://github.com/spotbugs/spotbugs/releases/download/4.8.3/spotbugs-4.8.3.tgz && \
+    tar -xvzf spotbugs-4.8.3.tgz -C /opt && rm spotbugs-4.8.3.tgz
+
+# Set Java home
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV PATH="$PATH:/opt/spotbugs-4.8.3/bin"
+
+# Default command
+CMD ["/bin/bash"]

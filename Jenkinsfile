@@ -1,112 +1,196 @@
+def getDockerTag(){
+    def tag = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+    return tag
+}
+
+def getAwsAccountID(){
+        def accountid = sh(script: 'aws sts get-caller-identity --query Account --output text', returnStdout: true).trim()
+        return accountid
+}
+
 pipeline{
-    agent any 
-    environment{
-        VERSION = "${env.BUILD_ID}"
+    agent {
+        label 'aws-ec2'
     }
+
+    environment{
+	    Docker_tag = getDockerTag()
+        aws_region = 'ap-south-1'
+        aws_account_id = getAwsAccountID()
+    }
+
     stages{
-        stage("sonar quality check"){
-            agent {
-                docker {
-                    image 'openjdk:11'
+        stage('intial checks'){
+             parallel { 
+                stage('tool check'){
+                    steps{
+                        script{
+                             sh 'chmod +x health-check.sh'
+                            sh './health-check.sh'
+                            currentBuild.description = "Branch: ${env.GIT_BRANCH}"
+                        }  
+                    }
+                }
+
+                stage('lint'){
+                    steps{
+                        script{
+
+                            def app = docker.build("lint", "-f Dockerfile-lint .")
+
+                            app.inside('--user root') {
+                                try { 
+                                        sh 'chmod +x lint-all.sh'
+                                        sh './lint-all.sh'
+                                    } 
+                                    catch (err) {
+                                        currentBuild.result = 'UNSTABLE'
+                                        echo "Please correct linter issues "
+                                        return // skip waitForQualityGate if gradle failed
+                                    }
+                            }
+                        }  
+                    }
                 }
             }
+        }
+
+    stage('parallel execution'){ 
+         parallel {
+        stage('Static Code Analysis'){
             steps{
                 script{
-                    withSonarQubeEnv(credentialsId: 'sonar-token') {
-                            sh 'chmod +x gradlew'
-                            sh './gradlew sonarqube'
-                    }
-
-                    timeout(time: 1, unit: 'HOURS') {
-                      def qg = waitForQualityGate()
-                      if (qg.status != 'OK') {
-                           error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                      }
-                    }
-
+                     docker.image('openjdk:11').inside('--user root') {
+                        try {
+                            withSonarQubeEnv(credentialsId: 'sonar-token') {
+                                    sh 'chmod +x gradlew'
+                                    sh './gradlew sonarqube'
+                            }
+                            } catch (err) {
+                                currentBuild.result = 'UNSTABLE'
+                                echo "SonarQube scan failed, marking build as UNSTABLE. Error: ${err}"
+                                return // skip waitForQualityGate if gradle failed
+                            }
+                        timeout(time: 1, unit: 'HOURS') {
+                              def qg = waitForQualityGate()
+                              if (qg.status != 'OK') {
+                                   error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                              }
+                            }
+                     }
                 }  
             }
-        }
-        stage("docker build & docker push"){
-            steps{
-                script{
-                    withCredentials([string(credentialsId: 'docker_pass', variable: 'docker_password')]) {
-                             sh '''
-                                docker build -t 34.125.214.226:8083/springapp:${VERSION} .
-                                docker login -u admin -p $docker_password 34.125.214.226:8083 
-                                docker push  34.125.214.226:8083/springapp:${VERSION}
-                                docker rmi 34.125.214.226:8083/springapp:${VERSION}
-                            '''
-                    }
-                }
-            }
-        }
-        stage('indentifying misconfigs using datree in helm charts'){
-            steps{
-                script{
 
-                    dir('kubernetes/') {
-                        withEnv(['DATREE_TOKEN=GJdx2cP2TCDyUY3EhQKgTc']) {
-                              sh 'helm datree test myapp/'
-                        }
-                    }
-                }
-            }
-        }
-        stage("pushing the helm charts to nexus"){
-            steps{
-                script{
-                    withCredentials([string(credentialsId: 'docker_pass', variable: 'docker_password')]) {
-                          dir('kubernetes/') {
-                             sh '''
-                                 helmversion=$( helm show chart myapp | grep version | cut -d: -f 2 | tr -d ' ')
-                                 tar -czvf  myapp-${helmversion}.tgz myapp/
-                                 curl -u admin:$docker_password http://34.125.214.226:8081/repository/helm-hosted/ --upload-file myapp-${helmversion}.tgz -v
-                            '''
-                          }
-                    }
-                }
-            }
         }
 
-        stage('manual approval'){
+        stage('build'){
             steps{
                 script{
-                    timeout(10) {
-                        mail bcc: '', body: "<br>Project: ${env.JOB_NAME} <br>Build Number: ${env.BUILD_NUMBER} <br> Go to build url and approve the deployment request <br> URL de build: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", to: "deekshith.snsep@gmail.com";  
-                        input(id: "Deploy Gate", message: "Deploy ${params.project_name}?", ok: 'Deploy')
+                    docker.image('openjdk:11').inside('--user root') {
+                        sh 'chmod +x gradlew'
+                        sh './gradlew build'
                     }
+                }  
+            }
+
+        }
+         }
+    }
+        stage('docker build & publish image'){
+            steps{
+                script{
+                    sh '''
+                        echo "[default]" > /home/ubuntu/.aws/config
+                        echo "region = ap-south-1" >> /home/ubuntu/.aws/config
+                        export AWS_CONFIG_FILE="/home/ubuntu/.aws/config"
+                        docker build -t spring-app:${Docker_tag} .
+                        aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin ${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com
+                        docker tag spring-app:${Docker_tag} ${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com/spring-app:${Docker_tag}
+                        docker push ${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com/spring-app:${Docker_tag}
+                    '''
+                }  
+            }
+
+        }
+
+
+        stage("prepare helm charts"){
+            steps{
+                script{
+                    sh '''
+                        sed -i "s:IMAGE_NAME:${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com/spring-app:" kubernetes/myapp/values.yaml
+                        sed -i "s:IMAGE_TAG:${Docker_tag}:" kubernetes/myapp/values.yaml
+                        helm package kubernetes/myapp/
+                        helmversion=$( helm show chart kubernetes/myapp/ | grep version | cut -d: -f 2 | tr -d ' ')
+                        aws s3 cp myapp-$helmversion.tgz s3://nimbuswiztech-website/helm-charts/spring-app-$helmversion.tgz
+                    '''
                 }
             }
         }
 
-        stage('Deploying application on k8s cluster') {
-            steps {
-               script{
-                   withCredentials([kubeconfigFile(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG')]) {
-                        dir('kubernetes/') {
-                          sh 'helm upgrade --install --set image.repository="34.125.214.226:8083/springapp" --set image.tag="${VERSION}" myjavaapp myapp/ ' 
-                        }
-                    }
-               }
-            }
-        }
 
-        stage('verifying app deployment'){
+        stage("deploy to eks cluster"){
             steps{
                 script{
-                     withCredentials([kubeconfigFile(credentialsId: 'kubernetes-config', variable: 'KUBECONFIG')]) {
-                         sh 'kubectl run curl --image=curlimages/curl -i --rm --restart=Never -- curl myjavaapp-myapp:8080'
+                     withCredentials([usernamePassword(credentialsId: 'aws-login-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
 
-                     }
+                    sh '''
+                        echo "[default]" > /home/ubuntu/.aws/config
+                        echo "region = ap-south-1" >> /home/ubuntu/.aws/config
+                        export AWS_CONFIG_FILE="/home/ubuntu/.aws/config"
+                        aws eks update-kubeconfig --region ${aws_region} --name my-eks-cluster
+                        helm upgrade --install myjavaapp kubernetes/myapp/
+                        helm list 
+                        sleep 120
+                        kubectl get po 
+                        
+                    '''
+                    }
                 }
             }
         }
+
+        stage("Verify deployment"){
+            steps{
+                script{
+                     withCredentials([usernamePassword(credentialsId: 'aws-login-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+
+                    sh '''
+                        echo "[default]" > /home/ubuntu/.aws/config
+                        echo "region = ap-south-1" >> /home/ubuntu/.aws/config
+                        export AWS_CONFIG_FILE="/home/ubuntu/.aws/config"
+                        aws eks update-kubeconfig --region ${aws_region} --name my-eks-cluster
+                        kubectl run curl --image=curlimages/curl -i --rm --restart=Never -- curl myjavaapp-myapp:8080
+                        
+                    '''
+                    }
+                }
+            }
+
+            post {
+                always {
+                  withCredentials([usernamePassword(credentialsId: 'aws-login-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+
+                    sh '''
+                        echo "[default]" > /home/ubuntu/.aws/config
+                        echo "region = ap-south-1" >> /home/ubuntu/.aws/config
+                        export AWS_CONFIG_FILE="/home/ubuntu/.aws/config"
+                        aws eks update-kubeconfig --region ${aws_region} --name my-eks-cluster
+                        helm uninstall myjavaapp
+                        
+                    '''
+                    }
+                }
+            }
+        }
+
     }
 
     post {
 		always {
-			mail bcc: '', body: "<br>Project: ${env.JOB_NAME} <br>Build Number: ${env.BUILD_NUMBER} <br> URL de build: ${env.BUILD_URL}", cc: '', charset: 'UTF-8', from: '', mimeType: 'text/html', replyTo: '', subject: "${currentBuild.result} CI: Project name -> ${env.JOB_NAME}", to: "deekshith.snsep@gmail.com";  
+            archiveArtifacts artifacts: 'kubernetes/myapp/', followSymlinks: false
+            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'build/reports/tests/test/', reportFiles: 'index.html', reportName: 'test-case-report', reportTitles: 'test-case-report', useWrapperFileDirectly: true])
+            cleanWs()
 		 }
 	   }
 }
